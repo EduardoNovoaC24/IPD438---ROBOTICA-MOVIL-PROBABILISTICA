@@ -212,7 +212,7 @@ def plot_static(h, segs):
 
     fig.suptitle('Guia 1 P2 Novoa IPD482 — Robot Omnidireccional 3 Ruedas Suecas',
                  fontsize=13, fontweight='bold')
-    fig.savefig('/mnt/user-data/outputs/p2_static.png', dpi=150, bbox_inches='tight')
+    fig.savefig('p2_static.png', dpi=150, bbox_inches='tight')
     print('OK  p2_static.png')
     plt.close(fig)
 
@@ -340,126 +340,10 @@ def make_gif(h, segs):
 
     anim = FuncAnimation(fig, update, frames=len(idx),
                          init_func=init, interval=int(1000/FPS), blit=False)
-    anim.save('/mnt/user-data/outputs/p2_realtime.gif', writer='pillow', fps=FPS, dpi=100)
+    anim.save('p2_realtime.gif', writer='pillow', fps=FPS, dpi=100)
     print('OK  p2_realtime.gif')
     plt.close(fig)
 
-
-def generate_notebook(h, segs):
-    nb_code = f"""
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-import matplotlib.gridspec as gridspec
-from matplotlib.lines import Line2D
-import ipywidgets as widgets
-from IPython.display import display
-
-R_robot = {R_robot}
-offsets = np.array({offsets.tolist()})
-
-h_X   = np.array({h['X'].tolist()})
-h_Y   = np.array({h['Y'].tolist()})
-h_phi = np.array({h['phi'].tolist()})
-h_v1  = np.array({h['v1'].tolist()})
-h_v2  = np.array({h['v2'].tolist()})
-h_v3  = np.array({h['v3'].tolist()})
-h_Xd  = np.array({h['Xd'].tolist()})
-h_Yd  = np.array({h['Yd'].tolist()})
-h_pd  = np.array({h['pd'].tolist()})
-h_t   = np.array({h['t'].tolist()})
-h_sid = np.array({h['sid'].tolist()})
-segs  = {segs}
-N     = len(h_t)
-
-def draw_robot(ax, x, y, phi, rb=0.10):
-    arts = []
-    body = plt.Circle((x,y), rb, color='steelblue', alpha=0.75, zorder=4)
-    ax.add_patch(body); arts.append(body)
-    wc = ['royalblue','darkorange','seagreen']
-    for off, col in zip(offsets, wc):
-        ang = phi + off
-        wx = x + rb*np.cos(ang); wy = y + rb*np.sin(ang)
-        rect = mpatches.Rectangle((wx-0.013,wy-0.032),0.026,0.064,
-            angle=np.degrees(ang+np.pi/2),rotation_point=(wx,wy),
-            fc=col,ec='white',lw=0.6,zorder=5)
-        ax.add_patch(rect); arts.append(rect)
-    arr = ax.annotate('',xy=(x+rb*1.1*np.cos(phi),y+rb*1.1*np.sin(phi)),
-        xytext=(x,y),arrowprops=dict(arrowstyle='->',color='white',lw=2),zorder=6)
-    arts.append(arr)
-    return arts
-
-def draw_frame(k):
-    fig = plt.figure(figsize=(14,8))
-    gs  = gridspec.GridSpec(3,2,figure=fig,hspace=0.48,wspace=0.32)
-    ax_xy  = fig.add_subplot(gs[:,0])
-    ax_vw  = fig.add_subplot(gs[0,1])
-    ax_vg  = fig.add_subplot(gs[1,1])
-    ax_phi = fig.add_subplot(gs[2,1])
-
-    for si, seg in enumerate(segs):
-        m = h_sid == si
-        ax_xy.plot(h_X[m], h_Y[m], color=seg['color'], lw=2.0, alpha=0.25)
-    ax_xy.plot(h_X[:k+1], h_Y[:k+1], 'steelblue', lw=2.0, zorder=2)
-    draw_robot(ax_xy, h_X[k], h_Y[k], h_phi[k])
-    ax_xy.plot(h_X[0], h_Y[0], 'go', ms=9, zorder=10)
-    ax_xy.set_aspect('equal'); ax_xy.grid(True, alpha=0.3)
-    ax_xy.set_xlabel('X_g [m]'); ax_xy.set_ylabel('Y_g [m]')
-    ax_xy.set_title(f't = {{h_t[k]:.2f}} s   phi = {{np.degrees(h_phi[k]):.1f}} deg')
-
-    for ax_ in [ax_vw, ax_vg, ax_phi]:
-        for si, seg in enumerate(segs):
-            m = h_sid == si
-            if m.any(): ax_.axvspan(h_t[m][0],h_t[m][-1],alpha=0.08,color=seg['color'])
-        ax_.set_xlim(0, h_t[-1]); ax_.grid(True, alpha=0.25)
-        ax_.axvline(h_t[k], color='red', lw=1.3, ls='--', alpha=0.8)
-
-    ti = h_t[:k+1]
-    ax_vw.plot(ti, h_v1[:k+1], color='royalblue',  lw=1.8, label='v1')
-    ax_vw.plot(ti, h_v2[:k+1], color='darkorange', lw=1.8, label='v2')
-    ax_vw.plot(ti, h_v3[:k+1], color='seagreen',   lw=1.8, label='v3')
-    ax_vw.set_ylabel('Vel. rueda [m/s]'); ax_vw.legend(fontsize=8)
-    ax_vw.set_title('Velocidades de ruedas')
-
-    ax_vg.plot(ti, h_Xd[:k+1], color='royalblue',  lw=1.8, label='Xd')
-    ax_vg.plot(ti, h_Yd[:k+1], color='darkorange', lw=1.8, label='Yd')
-    ax_vg.plot(ti, h_pd[:k+1], color='purple',     lw=1.8, label='pd')
-    ax_vg.set_ylabel('Vel. global'); ax_vg.legend(fontsize=8)
-    ax_vg.set_title('Velocidades globales')
-
-    ax_phi.plot(ti, np.degrees(h_phi[:k+1]), color='purple', lw=2.0)
-    ax_phi.set_ylabel('phi [deg]'); ax_phi.set_xlabel('Tiempo [s]')
-    ax_phi.set_title('Orientacion phi(t)')
-
-    fig.suptitle('Guia 1 P2 Novoa IPD482 — Robot Omnidireccional', fontsize=12, fontweight='bold')
-    plt.show(); plt.close(fig)
-
-slider = widgets.IntSlider(value=0, min=0, max=N-1, step=max(1,N//500),
-                           description='Frame:', layout=widgets.Layout(width='60%'))
-play   = widgets.Play(value=0, min=0, max=N-1, step=max(1,N//500), interval=40)
-widgets.jslink((play,'value'), (slider,'value'))
-out_w  = widgets.interactive_output(draw_frame, {{'k': slider}})
-display(widgets.VBox([widgets.HBox([play, slider]), out_w]))
-"""
-    nb = {
-        "nbformat": 4, "nbformat_minor": 5,
-        "metadata": {
-            "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
-            "language_info": {"name": "python", "version": "3.10.0"}
-        },
-        "cells": [
-            {"cell_type": "markdown", "metadata": {}, "source": [
-                "# Guia 1 P2 Novoa IPD482\n",
-                "Robot Omnidireccional — 3 Ruedas Suecas\n\n",
-                "Usa el slider o Play para navegar la simulacion."
-            ]},
-            {"cell_type": "code", "execution_count": None,
-             "metadata": {}, "outputs": [], "source": [nb_code]}
-        ]
-    }
-    with open('/mnt/user-data/outputs/p2_interactivo.ipynb', 'w') as f:
-        json.dump(nb, f, indent=2, ensure_ascii=False)
-    print('OK  p2_interactivo.ipynb')
 
 # =============================================================================
 # MAIN
