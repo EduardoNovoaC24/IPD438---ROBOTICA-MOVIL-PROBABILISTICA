@@ -12,9 +12,7 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.lines import Line2D
 import json
 
-# =============================================================================
-# 1. PARAMETROS DEL ROBOT OMNIDIRECCIONAL
-# =============================================================================
+# PARAMETROS DEL ROBOT OMNIDIRECCIONAL
 R_robot  = 0.25          # Distancia del centro del chasis a cada rueda [m]
 r        = 0.05          # Radio de las ruedas suecas [m]
 theta1   = 0.0           # Angulo de montaje rueda 1 [rad]
@@ -24,19 +22,14 @@ offsets  = np.array([theta1, theta2, theta3])
 dt       = 0.01          # Paso de tiempo de simulacion [s]
 T_ramp   = 0.5           # Tiempo de rampa del perfil trapezoidal [s]
 
-# =============================================================================
-# 2. PARAMETROS DE LA TRAYECTORIA
-# =============================================================================
+# PARAMETROS DE LA TRAYECTORIA
 v0       = 0.2           # Velocidad lineal de avance [m/s]
 R_curva  = 0.5           # Radio de la semicircunferencia [m]
 omega0   = v0 / R_curva  # Velocidad angular para la curva [rad/s]
 t_recta  = 2.0 / v0      # Duracion de cada tramo recto [s]
 t_curva  = np.pi / omega0 # Duracion de cada semicircunferencia [s]
 
-# =============================================================================
-# 3. CINEMATICA
-# =============================================================================
-
+# CINEMATICA
 def cinematica_inversa(Xd, Yd, pd, phi):
     # Dado el vector de velocidad deseado del chasis en el marco global,
     # calcula las velocidades de cada rueda usando la restriccion de rodadura:
@@ -57,9 +50,7 @@ def cinematica_directa(vw, phi):
     pd = (2/3)*(1/(2*R_robot))*(v1 + v2 + v3)
     return Xd, Yd, pd
 
-# =============================================================================
-# 4. PERFIL TRAPEZOIDAL
-# =============================================================================
+# PERFIL TRAPEZOIDAL
 
 def trapezoid(t_total, v_cruise, t_ramp, dt):
     # Genera un perfil de velocidad trapezoidal: rampa subida, crucero, rampa bajada.
@@ -73,10 +64,7 @@ def trapezoid(t_total, v_cruise, t_ramp, dt):
         else:              v[i] = v_cruise
     return v
 
-# =============================================================================
-# 5. MISION
-# =============================================================================
-
+# MISION
 def build_mission():
     return [
         dict(label='Fase 1: Recta 2 m (+X)',           Vl=v0, om=0,       t=t_recta, color='royalblue'),
@@ -85,9 +73,7 @@ def build_mission():
         dict(label='Fase 4: Semicirculo R=0.5 m (der)', Vl=v0, om=-omega0, t=t_curva, color='firebrick'),
     ]
 
-# =============================================================================
-# 6. SIMULACION
-# =============================================================================
+# SIMULACION
 
 def simulate():
     segs     = build_mission()
@@ -128,9 +114,7 @@ def simulate():
 
     return {k: np.array(v) for k, v in rec.items()}, segs
 
-# =============================================================================
-# 7. DIBUJO DEL ROBOT
-# =============================================================================
+# DIBUJO DEL ROBOT
 
 def draw_robot(ax, x, y, phi, rb=0.10):
     # Cuerpo circular + 3 ruedas coloreadas + flecha de heading
@@ -159,10 +143,6 @@ def draw_robot(ax, x, y, phi, rb=0.10):
     arts.append(arr)
     return arts
 
-# =============================================================================
-# 8. FIGURA ESTATICA
-# Layout: GridSpec(3,2) — XY izquierda (3 filas), 3 graficas apiladas derecha
-# =============================================================================
 
 def plot_static(h, segs):
     fig = plt.figure(figsize=(15, 10))
@@ -235,11 +215,6 @@ def plot_static(h, segs):
     fig.savefig('/mnt/user-data/outputs/p2_static.png', dpi=150, bbox_inches='tight')
     print('OK  p2_static.png')
     plt.close(fig)
-
-# =============================================================================
-# 9. GIF EN TIEMPO REAL
-# Cada frame: actualiza traza XY + robot + 3 graficas + cursor rojo vertical
-# =============================================================================
 
 def make_gif(h, segs):
     SKIP = 10
@@ -369,10 +344,6 @@ def make_gif(h, segs):
     print('OK  p2_realtime.gif')
     plt.close(fig)
 
-# =============================================================================
-# 10. NOTEBOOK INTERACTIVO
-# Play + IntSlider vinculados con jslink — mismo patron que P3
-# =============================================================================
 
 def generate_notebook(h, segs):
     nb_code = f"""
