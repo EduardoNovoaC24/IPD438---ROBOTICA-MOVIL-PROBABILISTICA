@@ -12,33 +12,28 @@ from matplotlib.lines import Line2D
 import matplotlib.animation as animation
 import json
 
-# =============================================================================
-# 1. PARAMETROS DEL TRACTOR  (Clearpath Husky A200 — biciclo traccion trasera)
-# =============================================================================
+# PARAMETROS DEL TRACTOR  (Clearpath Husky A200 — biciclo traccion trasera)
+
 d        = 0.50   # Distancia entre ejes del tractor [m]  (nomenclatura Jorquera p.12)
 W_trac   = 0.40   # Ancho visual del tractor [m]
 L_trac   = 0.65   # Largo visual del tractor [m]
 
-# =============================================================================
-# 2. PARAMETROS DEL ENGANCHE Y TRAILER  (Gorilla Cart GOR1001 — mitad)
-# =============================================================================
+# PARAMETROS DEL ENGANCHE Y TRAILER  (Gorilla Cart GOR1001 — mitad)
+
 d_h      = 0.10   # Offset del enganche detras del eje trasero del tractor [m]
 L1       = 0.60   # Distancia enganche -> eje trasero del trailer [m]
 W_trail  = 0.50   # Ancho visual del trailer [m]
 L_trail  = 0.80   # Largo visual del trailer [m]
 
-# =============================================================================
-# 3. PARAMETROS DE SIMULACION Y TRAYECTORIA
-# =============================================================================
+# PARAMETROS DE SIMULACION Y TRAYECTORIA
+
 v0       = 0.30   # Velocidad lineal de avance [m/s]
 T_ramp   = 0.60   # Tiempo de rampa del perfil trapezoidal [s]
 dt       = 0.02   # Paso de tiempo de simulacion [s]
 d_recta  = 3.0    # Distancia de la fase recta [m]
 R_curva  = 1.0    # Radio de la circunferencia [m]
 
-# =============================================================================
-# 4. PERFIL TRAPEZOIDAL
-# =============================================================================
+# PERFIL TRAPEZOIDAL
 
 def trapezoid(t_total, v_max, t_ramp, dt):
     # Perfil de velocidad continuo: evita discontinuidades en las entradas.
@@ -50,10 +45,7 @@ def trapezoid(t_total, v_max, t_ramp, dt):
         elif ti < t_total:            v[i] = v_max * (t_total - ti) / t_ramp
     return t, v
 
-# =============================================================================
-# 5. MISION
-# =============================================================================
-
+# MISION
 def build_mission():
     # Fase 1: recta — alpha = 0, sin rotacion del tractor
     # Fase 2: circunferencia — alpha obtenido invirtiendo phi0_dot = (v/d)*tan(alpha)
@@ -65,9 +57,7 @@ def build_mission():
         {'type': 'circle',   't_total': t2, 'alpha': alpha_c, 'color': 'darkorange', 'label': f'Fase 2: Circunferencia R={R_curva} m'},
     ]
 
-# =============================================================================
-# 6. CINEMATICA DIRECTA (un paso Euler)
-# =============================================================================
+# CINEMATICA 
 
 def step_forward(state, v, alpha, dt):
     # Tractor — biciclo traccion trasera (Jorquera p.12):
@@ -103,9 +93,7 @@ def trailer_axle_pos(state):
     Ty = Hy - L1  * np.sin(phi1)
     return Hx, Hy, Tx, Ty
 
-# =============================================================================
-# 7. SIMULACION
-# =============================================================================
+# SIMULACION
 
 def simulate():
     mission  = build_mission()
@@ -132,9 +120,7 @@ def simulate():
     return (np.array(states), np.array(controls),
             np.array(times),  np.array(sid))
 
-# =============================================================================
-# 8. DIBUJO DEL VEHICULO
-# =============================================================================
+
 
 def draw_vehicle(ax, state, alpha_val=1.0):
     X, Y, phi0, phi1 = state
@@ -170,11 +156,6 @@ def draw_vehicle(ax, state, alpha_val=1.0):
     ax.plot([Hx, Tx], [Hy, Ty], '-', color='#888888', lw=1.8, zorder=4)
     ax.plot(Hx, Hy, 'o', color='#FFC107', ms=6, zorder=7,
             markeredgecolor='#555', markeredgewidth=0.8)
-
-# =============================================================================
-# 9. FIGURA ESTATICA
-# Layout: GridSpec(3,2) — XY izquierda (3 filas), 3 graficas apiladas derecha
-# =============================================================================
 
 def plot_static(states, controls, times, sid, segs):
     Tx_arr, Ty_arr = [], []
@@ -268,13 +249,11 @@ def plot_static(states, controls, times, sid, segs):
                  'Tractor: Husky A200  |  Trailer: Gorilla Cart GOR1001 (1/2)',
                  fontsize=10, fontweight='bold')
 
-    fig.savefig('/mnt/user-data/outputs/p3_static.png', dpi=150, bbox_inches='tight', facecolor='white')
+    fig.savefig('p3_static.png', dpi=150, bbox_inches='tight', facecolor='white')
     print('OK  p3_static.png')
     plt.close(fig)
 
-# =============================================================================
-# 10. GIF EN TIEMPO REAL
-# =============================================================================
+
 
 def make_gif(states, controls, times, sid, segs):
     N      = len(states)
@@ -422,137 +401,10 @@ def make_gif(states, controls, times, sid, segs):
 
     ani = animation.FuncAnimation(fig, update, frames=N//stride,
                                   init_func=init, interval=40, blit=False)
-    ani.save('/mnt/user-data/outputs/p3_realtime.gif', writer='pillow', fps=25, dpi=100)
+    ani.save('p3_realtime.gif', writer='pillow', fps=25, dpi=100)
     print('OK  p3_realtime.gif')
     plt.close(fig)
 
-# =============================================================================
-# 11. NOTEBOOK INTERACTIVO
-# =============================================================================
-
-def generate_notebook(states, controls, times, sid, segs):
-    Tx_arr, Ty_arr = [], []
-    for s in states:
-        _, _, Tx, Ty = trailer_axle_pos(s)
-        Tx_arr.append(Tx); Ty_arr.append(Ty)
-    betas = np.degrees(states[:, 2] - states[:, 3])
-
-    nb_code = f"""
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import matplotlib.gridspec as gridspec
-from matplotlib.lines import Line2D
-import ipywidgets as widgets
-from IPython.display import display
-
-d={d}; d_h={d_h}; L1={L1}; L_trail={L_trail}; W_trail={W_trail}; L_trac={L_trac}; W_trac={W_trac}
-states  = np.{repr(states)}
-controls= np.{repr(controls)}
-times   = np.{repr(times)}
-sid     = np.{repr(sid)}
-betas   = np.{repr(betas)}
-Tx_arr  = {Tx_arr}
-Ty_arr  = {Ty_arr}
-segs    = {segs}
-N       = len(states)
-
-def trailer_axle_pos(state):
-    X,Y,phi0,phi1=state
-    Hx=X-d_h*np.cos(phi0); Hy=Y-d_h*np.sin(phi0)
-    Tx=Hx-L1*np.cos(phi1); Ty=Hy-L1*np.sin(phi1)
-    return Hx,Hy,Tx,Ty
-
-def draw_frame(k):
-    fig=plt.figure(figsize=(16,9),facecolor='white')
-    gs=gridspec.GridSpec(3,2,figure=fig,left=0.06,right=0.97,top=0.92,bottom=0.08,hspace=0.50,wspace=0.38)
-    ax_xy=fig.add_subplot(gs[:,0]); ax1=fig.add_subplot(gs[0,1]); ax1r=ax1.twinx()
-    ax2=fig.add_subplot(gs[1,1]); ax3=fig.add_subplot(gs[2,1])
-
-    for si,seg in enumerate(segs):
-        m=sid==si
-        ax_xy.plot(states[m,0],states[m,1],color=seg['color'],lw=0.8,alpha=0.2)
-    ax_xy.plot(states[:k+1,0],states[:k+1,1],color='#1565C0',lw=1.8)
-    ax_xy.plot(Tx_arr[:k+1],Ty_arr[:k+1],color='#E65100',lw=1.8,ls='--')
-
-    s=states[k]; X,Y,phi0,phi1=s; Hx,Hy,Tx_k,Ty_k=trailer_axle_pos(s)
-    def mp(cx,cy,ang,l,w,fc):
-        ca,sa=np.cos(ang),np.sin(ang); dx,dy=l/2,w/2
-        c=np.array([[-dx,-dy],[dx,-dy],[dx,dy],[-dx,dy]])
-        r=np.array([[ca,-sa],[sa,ca]])
-        pts=(r@c.T).T+np.array([cx,cy])
-        return patches.Polygon(pts,closed=True,facecolor=fc,edgecolor='#333',lw=1.2,zorder=4)
-    cx_tr=(Hx+Tx_k)/2; cy_tr=(Hy+Ty_k)/2
-    ax_xy.add_patch(mp(cx_tr,cy_tr,phi1,L_trail,W_trail,'#E65100'))
-    cx_t=X-(d/2)*np.cos(phi0); cy_t=Y-(d/2)*np.sin(phi0)
-    ax_xy.add_patch(mp(cx_t,cy_t,phi0,L_trac,W_trac,'#1565C0'))
-    ax_xy.plot([X,Hx,Tx_k],[Y,Hy,Ty_k],color='#555',lw=1.8,zorder=3)
-    ax_xy.plot(Hx,Hy,'o',color='#FFC107',ms=6,zorder=6)
-
-    margin=1.2
-    all_x=list(states[:,0])+Tx_arr; all_y=list(states[:,1])+Ty_arr
-    ax_xy.set_xlim(min(all_x)-margin,max(all_x)+margin)
-    ax_xy.set_ylim(min(all_y)-margin,max(all_y)+margin)
-    ax_xy.set_aspect('equal'); ax_xy.grid(True,alpha=0.3)
-    ax_xy.set_title(f't = {{times[k]:.2f}} s',fontsize=11,fontweight='bold')
-    ax_xy.set_xlabel('X [m]'); ax_xy.set_ylabel('Y [m]')
-
-    for ax_ in [ax1,ax2,ax3]:
-        for si,seg in enumerate(segs):
-            m=sid==si
-            if m.any(): ax_.axvspan(times[m][0],times[m][-1],alpha=0.08,color=seg['color'])
-        ax_.set_facecolor('#F8F9FA'); ax_.grid(True,color='#DDDDDD',lw=0.6,alpha=0.8)
-        ax_.set_xlim(times[0],times[-1])
-        ax_.axvline(times[k],color='red',lw=1.0,alpha=0.7)
-
-    t_k=times[:k+1]
-    ax1.plot(t_k,controls[:k+1,0],color='#1565C0',lw=1.6,label='v')
-    ax1r.plot(t_k,np.degrees(controls[:k+1,1]),color='#C62828',lw=1.6,ls='--',label='alpha')
-    ax1.set_title('v y alpha',fontsize=10,fontweight='bold')
-    ax1.set_ylabel('v [m/s]',color='#1565C0',fontsize=9)
-    ax1r.set_ylabel('alpha [deg]',color='#C62828',fontsize=9)
-
-    ax2.plot(t_k,np.degrees(states[:k+1,2]),color='#1565C0',lw=1.6,label='phi0')
-    ax2.plot(t_k,np.degrees(states[:k+1,3]),color='#E65100',lw=1.6,ls='--',label='phi1')
-    ax2.set_title('Orientaciones',fontsize=10,fontweight='bold')
-    ax2.set_ylabel('[deg]',fontsize=9); ax2.legend(fontsize=8)
-
-    ax3.plot(t_k,betas[:k+1],color='#2E7D32',lw=1.6,label='beta')
-    ax3.axhline(0,color='#AAAAAA',lw=0.8,ls=':')
-    ax3.set_title('Articulacion beta',fontsize=10,fontweight='bold')
-    ax3.set_ylabel('[deg]',fontsize=9); ax3.set_xlabel('Tiempo [s]',fontsize=9)
-    ax3.legend(fontsize=8)
-
-    fig.suptitle('Guia 1 P3 Novoa IPD482 — TTWR off-axle',fontsize=10,fontweight='bold')
-    plt.show(); plt.close(fig)
-
-slider=widgets.IntSlider(value=0,min=0,max=N-1,step=max(1,N//500),
-                         description='Frame:',layout=widgets.Layout(width='60%'))
-play=widgets.Play(value=0,min=0,max=N-1,step=max(1,N//500),interval=40)
-widgets.jslink((play,'value'),(slider,'value'))
-out_w=widgets.interactive_output(draw_frame,{{'k':slider}})
-display(widgets.VBox([widgets.HBox([play,slider]),out_w]))
-"""
-
-    nb = {
-        "nbformat": 4, "nbformat_minor": 5,
-        "metadata": {
-            "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
-            "language_info": {"name": "python", "version": "3.10.0"}
-        },
-        "cells": [
-            {"cell_type": "markdown", "metadata": {}, "source": [
-                "# Guia 1 P3 Novoa IPD482\n",
-                "Sistema TTWR — Car-like + Trailer pasivo (off-axle hitching)\n\n",
-                "Usa el slider o Play para navegar la simulacion."
-            ]},
-            {"cell_type": "code", "execution_count": None,
-             "metadata": {}, "outputs": [], "source": [nb_code]}
-        ]
-    }
-    with open('/mnt/user-data/outputs/p3_interactivo.ipynb', 'w') as f:
-        json.dump(nb, f, indent=2, ensure_ascii=False)
-    print('OK  p3_interactivo.ipynb')
 
 # =============================================================================
 # MAIN
@@ -565,4 +417,3 @@ if __name__ == '__main__':
     print(f'beta_max: {np.degrees(np.abs(states[:,2]-states[:,3])).max():.2f} deg')
     plot_static(states, controls, times, sid, segs)
     make_gif(states, controls, times, sid, segs)
-    generate_notebook(states, controls, times, sid, segs)
