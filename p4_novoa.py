@@ -12,9 +12,8 @@ from matplotlib.lines import Line2D
 import matplotlib.animation as animation
 import json
 
-# =============================================================================
-# 1. PARAMETROS FISICOS DEL ROBOT
-# =============================================================================
+# PARAMETROS FISICOS DEL ROBOT
+
 m    = 4.0      # Masa total [kg]
 I    = 0.08     # Momento de inercia rotacional alrededor del eje vertical [kg*m^2]
 r    = 0.07     # Radio de cada rueda [m]
@@ -22,26 +21,22 @@ L    = 0.28     # Distancia entre ruedas [m]
 cv   = 2.6667   # Coeficiente de friccion viscosa traslacional [N*s/m]
 cw   = 0.1244   # Coeficiente de friccion viscosa rotacional [N*m*s]
 
-# =============================================================================
-# 2. PARAMETROS DE SIMULACION
-# =============================================================================
+# PARAMETROS DE SIMULACION
+
 tau  = 0.0467   # Torque de actuacion aplicado por maniobra [N*m]
 dt   = 0.01     # Paso de tiempo de simulacion [s]
 T_man = 6.0     # Duracion de cada maniobra [s]
 
-# =============================================================================
-# 3. VELOCIDADES TERMINALES TEORICAS
+# VELOCIDADES TERMINALES TEORICAS
 # Provienen de las ecuaciones en estado estacionario (v_dot = 0, omega_dot = 0)
-# =============================================================================
+
 v_term   = 2 * tau / (r * cv)            # 0.500 m/s — maniobras M1 y M2
 tau_v    = m / cv                         # 1.500 s   — constante de tiempo de v
 tau_om   = I / cw                         # 0.645 s   — constante de tiempo de omega
 om_term3 = L * tau / (2 * r * cw)        # 0.750 rad/s — maniobra M3
 om_term4 = L * 2 * tau / (r * cw)        # 1.502 rad/s — maniobra M4
 
-# =============================================================================
-# 4. MANIOBRAS
-# =============================================================================
+# MANIOBRAS
 MANIOBRAS = [
     {'tau_R': +tau, 'tau_L': +tau,  'color': 'royalblue',  'label': 'M1: Adelante'},
     {'tau_R': -tau, 'tau_L': -tau,  'color': 'firebrick',  'label': 'M2: Atras'},
@@ -49,9 +44,7 @@ MANIOBRAS = [
     {'tau_R': +tau, 'tau_L': -tau,  'color': 'darkorchid', 'label': 'M4: Contrapuestas'},
 ]
 
-# =============================================================================
-# 5. DINAMICA  (Newton-Euler)
-# =============================================================================
+# DINAMICA  (Newton-Euler)
 
 def dynamics(state, tau_R, tau_L):
     # Ecuaciones de movimiento en espacio de estados X = [x, y, theta, v, omega]:
@@ -90,9 +83,7 @@ def step_rk4(state, tau_R, tau_L, dt):
     k4 = dynamics(state + dt*k3,   tau_R, tau_L)
     return state + dt/6 * (k1 + 2*k2 + 2*k3 + k4)
 
-# =============================================================================
-# 6. SIMULACION — 4 maniobras concatenadas
-# =============================================================================
+# SIMULACION — 4 maniobras concatenadas
 
 def simulate():
     # Cada maniobra parte con v=0, omega=0 para visualizar claramente
@@ -135,9 +126,6 @@ def simulate():
             np.array(tauL_all),   np.array(times_all),
             np.array(sid_all))
 
-# =============================================================================
-# 7. DIBUJO DEL ROBOT
-# =============================================================================
 
 def draw_robot(ax, x, y, theta, color, alpha=1.0):
     circle = patches.Circle((x, y), 0.05,
@@ -149,13 +137,9 @@ def draw_robot(ax, x, y, theta, color, alpha=1.0):
     ax.annotate('', xy=(x+dx, y+dy), xytext=(x, y),
                 arrowprops=dict(arrowstyle='->', color=color, lw=1.4), zorder=5)
 
-# =============================================================================
-# 8. FIGURA ESTATICA
-# Layout: GridSpec(3,2) — XY izquierda (3 filas), 3 graficas apiladas derecha
 # Grafica 1: torques tau_R y tau_L vs tiempo
 # Grafica 2: velocidad lineal v(t) con valor terminal anotado
 # Grafica 3: velocidad angular omega(t) con valores terminales anotados
-# =============================================================================
 
 def plot_static(states, tauR, tauL, times, sid):
     fig = plt.figure(figsize=(16, 9), facecolor='white')
@@ -262,13 +246,9 @@ def plot_static(states, tauR, tauL, times, sid):
         f'$m={m}$ kg, $I={I}$ kg·m$^2$, $r={r}$ m, $L={L}$ m',
         fontsize=9, fontweight='bold')
 
-    fig.savefig('/mnt/user-data/outputs/p4_static.png', dpi=150, bbox_inches='tight', facecolor='white')
+    fig.savefig('p4_static.png', dpi=150, bbox_inches='tight', facecolor='white')
     print('OK  p4_static.png')
     plt.close(fig)
-
-# =============================================================================
-# 9. GIF EN TIEMPO REAL
-# =============================================================================
 
 def make_gif(states, tauR, tauL, times, sid):
     N      = len(states)
@@ -393,121 +373,9 @@ def make_gif(states, tauR, tauL, times, sid):
 
     ani = animation.FuncAnimation(fig, update, frames=N//stride,
                                   init_func=init, interval=40, blit=False)
-    ani.save('/mnt/user-data/outputs/p4_realtime.gif', writer='pillow', fps=25, dpi=100)
+    ani.save('p4_realtime.gif', writer='pillow', fps=25, dpi=100)
     print('OK  p4_realtime.gif')
     plt.close(fig)
-
-# =============================================================================
-# 10. NOTEBOOK INTERACTIVO
-# =============================================================================
-
-def generate_notebook(states, tauR, tauL, times, sid):
-    nb_code = f"""
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import matplotlib.gridspec as gridspec
-from matplotlib.lines import Line2D
-import ipywidgets as widgets
-from IPython.display import display
-
-m={m}; I={I}; r={r}; L={L}; cv={cv}; cw={cw}; tau={tau}
-MANIOBRAS = {MANIOBRAS}
-states = np.{repr(states)}
-tauR   = np.{repr(tauR)}
-tauL   = np.{repr(tauL)}
-times  = np.{repr(times)}
-sid    = np.{repr(sid)}
-N      = len(states)
-
-def draw_frame(k):
-    fig=plt.figure(figsize=(16,9),facecolor='white')
-    gs=gridspec.GridSpec(3,2,figure=fig,left=0.06,right=0.97,top=0.92,bottom=0.08,hspace=0.50,wspace=0.38)
-    ax_xy=fig.add_subplot(gs[:,0]); ax1=fig.add_subplot(gs[0,1])
-    ax2=fig.add_subplot(gs[1,1]); ax3=fig.add_subplot(gs[2,1])
-
-    for mi,man in enumerate(MANIOBRAS):
-        mk=sid==mi
-        ax_xy.plot(states[mk,0],states[mk,1],color=man['color'],lw=0.8,alpha=0.2)
-        m_all=np.where(mk)[0]; m_k=m_all[m_all<=k]
-        if len(m_k):
-            ax_xy.plot(states[m_k,0],states[m_k,1],color=man['color'],lw=1.8)
-            idx=m_k[-1]
-            circ=patches.Circle((states[idx,0],states[idx,1]),0.05,
-                                  facecolor=man['color'],edgecolor='#333',lw=0.8,alpha=0.9,zorder=4)
-            ax_xy.add_patch(circ)
-            dx=0.09*np.cos(states[idx,2]); dy=0.09*np.sin(states[idx,2])
-            ax_xy.annotate('',xy=(states[idx,0]+dx,states[idx,1]+dy),
-                xytext=(states[idx,0],states[idx,1]),
-                arrowprops=dict(arrowstyle='->',color=man['color'],lw=1.3),zorder=5)
-
-    margin=0.25
-    ax_xy.set_xlim(states[:,0].min()-margin,states[:,0].max()+margin)
-    ax_xy.set_ylim(states[:,1].min()-margin,states[:,1].max()+margin)
-    ax_xy.set_aspect('equal'); ax_xy.grid(True,alpha=0.3)
-    ax_xy.set_xlabel('X [m]'); ax_xy.set_ylabel('Y [m]')
-    ax_xy.set_title(f't = {{times[k]:.2f}} s',fontsize=11,fontweight='bold')
-    ax_xy.legend(handles=[Line2D([0],[0],color=man['color'],lw=2.5,label=man['label'])
-                           for man in MANIOBRAS],fontsize=8,loc='upper right')
-
-    for ax_ in [ax1,ax2,ax3]:
-        for mi,man in enumerate(MANIOBRAS):
-            mk=sid==mi
-            if mk.any(): ax_.axvspan(times[mk][0],times[mk][-1],alpha=0.07,color=man['color'])
-        ax_.set_facecolor('#F8F9FA'); ax_.grid(True,color='#DDDDDD',lw=0.6,alpha=0.8)
-        ax_.set_xlim(times[0],times[-1])
-        ax_.axvline(times[k],color='red',lw=1.0,alpha=0.7)
-
-    t_k=times[:k+1]
-    ax1.plot(t_k,tauR[:k+1]*1000,color='#2E7D32',lw=1.6,label='tau_R')
-    ax1.plot(t_k,tauL[:k+1]*1000,color='#E65100',lw=1.6,ls='--',label='tau_L')
-    ax1.axhline(0,color='#AAAAAA',lw=0.8,ls=':')
-    ax1.set_title('Torques',fontsize=10,fontweight='bold')
-    ax1.set_ylabel('Torque [mN·m]',fontsize=9); ax1.legend(fontsize=8)
-
-    for mi,man in enumerate(MANIOBRAS):
-        mk=np.where(sid==mi)[0]; m_k=mk[mk<=k]
-        if len(m_k):
-            ax2.plot(times[m_k],states[m_k,3],color=man['color'],lw=1.8,label=f'M{{mi+1}}')
-            ax3.plot(times[m_k],states[m_k,4],color=man['color'],lw=1.8,label=f'M{{mi+1}}')
-    ax2.axhline(0,color='#AAAAAA',lw=0.7,ls=':')
-    ax2.set_title('Velocidad lineal v(t)',fontsize=10,fontweight='bold')
-    ax2.set_ylabel('v [m/s]',fontsize=9); ax2.legend(fontsize=8)
-    ax3.axhline(0,color='#AAAAAA',lw=0.7,ls=':')
-    ax3.set_title('Velocidad angular omega(t)',fontsize=10,fontweight='bold')
-    ax3.set_ylabel('omega [rad/s]',fontsize=9); ax3.set_xlabel('Tiempo [s]',fontsize=9); ax3.legend(fontsize=8)
-
-    fig.suptitle('Guia 1 P4 Novoa IPD482 — Dinamica uniciclo',fontsize=10,fontweight='bold')
-    plt.show(); plt.close(fig)
-
-slider=widgets.IntSlider(value=0,min=0,max=N-1,step=max(1,N//500),
-                         description='Frame:',layout=widgets.Layout(width='60%'))
-play=widgets.Play(value=0,min=0,max=N-1,step=max(1,N//500),interval=40)
-widgets.jslink((play,'value'),(slider,'value'))
-out_w=widgets.interactive_output(draw_frame,{{'k':slider}})
-display(widgets.VBox([widgets.HBox([play,slider]),out_w]))
-"""
-
-    nb = {
-        "nbformat": 4, "nbformat_minor": 5,
-        "metadata": {
-            "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
-            "language_info": {"name": "python", "version": "3.10.0"}
-        },
-        "cells": [
-            {"cell_type": "markdown", "metadata": {}, "source": [
-                "# Guia 1 P4 Novoa IPD482\n",
-                "Dinamica directa del robot uniciclo — Newton-Euler\n\n",
-                "4 maniobras: adelante, atras, una rueda, contrapuestas.\n",
-                "Usa el slider o Play para navegar la simulacion."
-            ]},
-            {"cell_type": "code", "execution_count": None,
-             "metadata": {}, "outputs": [], "source": [nb_code]}
-        ]
-    }
-    with open('/mnt/user-data/outputs/p4_interactivo.ipynb', 'w') as f:
-        json.dump(nb, f, indent=2, ensure_ascii=False)
-    print('OK  p4_interactivo.ipynb')
 
 # =============================================================================
 # MAIN
@@ -524,4 +392,3 @@ if __name__ == '__main__':
 
     plot_static(states, tauR, tauL, times, sid)
     make_gif(states, tauR, tauL, times, sid)
-    generate_notebook(states, tauR, tauL, times, sid)
