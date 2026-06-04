@@ -1,2 +1,3 @@
 # IPD438---ROBOTICA-MOVIL-PROBABILISTICA
-Repositorio en donde cada branch contiene los codigos de las guias del primer semestre del 2026
+https://youtu.be/nRxr64nE1Ak
+Link de prueba Guia_2
