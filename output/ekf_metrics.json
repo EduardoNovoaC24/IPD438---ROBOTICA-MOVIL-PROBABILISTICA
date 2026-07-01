@@ -1,0 +1,20 @@
+{
+  "odom_pura": {
+    "rmse_pos_m": 0.053747929205939314,
+    "rmse_theta_deg": 1.3214807435042442,
+    "rmse_psi1_deg": 0.7875347406703234,
+    "max_err_pos_m": 0.10425237808730999
+  },
+  "ekf_fusion": {
+    "rmse_pos_m": 0.02095140158619439,
+    "rmse_theta_deg": 0.709403817560473,
+    "rmse_psi1_deg": 0.5885157544061185,
+    "max_err_pos_m": 0.04472436206213542
+  },
+  "mejora_factor_pos": 2.5653619871119124,
+  "sigma_v": 0.03,
+  "sigma_w": 0.05,
+  "sigma_gps_xy": 0.15,
+  "sigma_theta_deg": 3.0,
+  "sigma_psi1_deg": 2.0
+}

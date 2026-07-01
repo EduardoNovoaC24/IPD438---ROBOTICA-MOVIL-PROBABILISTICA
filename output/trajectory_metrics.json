@@ -1,0 +1,28 @@
+{
+  "n_steps": 274,
+  "tiempo_final_s": 27.300000000000118,
+  "psi1_max_deg": 35.79903573787426,
+  "psi1_rms_deg": 15.118394247303199,
+  "psi1_mean_abs_deg": 12.426203597822896,
+  "jackknife_risk": false,
+  "tracking_error_planificada_vs_ejecutada": {
+    "mean_m": 0.01976429189207096,
+    "max_m": 0.08019830384543866,
+    "rmse_m": 0.022631133487952967
+  },
+  "odometria_vs_gt": {
+    "rmse_pos_m": 0.24916105894499893,
+    "max_err_pos_m": 0.4991053428394482
+  },
+  "ekf_vs_gt": {
+    "rmse_pos_m": 0.016530927449089582,
+    "rmse_theta_deg": 0.7462170746703322,
+    "max_err_pos_m": 0.0435109396990102
+  },
+  "mejora_factor_pos": 15.072418635454184,
+  "sigma_v": 0.03,
+  "sigma_w": 0.05,
+  "sigma_gps_xy": 0.15,
+  "sigma_theta_deg": 3.0,
+  "sigma_psi1_deg": 2.0
+}

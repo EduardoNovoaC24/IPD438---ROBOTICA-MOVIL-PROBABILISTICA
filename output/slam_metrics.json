@@ -1,0 +1,13 @@
+{
+  "rmse_pos_m": 0.009642388828986083,
+  "rmse_theta_deg": 2.4517936135154793e-13,
+  "max_err_pos_m": 0.014575236462732405,
+  "grid_resolution_m": 0.1,
+  "grid_shape": [
+    80,
+    120
+  ],
+  "l_occ": 0.847,
+  "l_free": -0.847,
+  "beam_stride": 5
+}

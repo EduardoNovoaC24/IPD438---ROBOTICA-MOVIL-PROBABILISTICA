@@ -1,0 +1,49 @@
+{
+  "noise_levels": {
+    "bajo": {
+      "sigma_v": 0.015,
+      "sigma_w": 0.025,
+      "sigma_gps_xy": 0.07,
+      "sigma_theta_deg": 1.5,
+      "sigma_psi1_deg": 1.0
+    },
+    "nominal": {
+      "sigma_v": 0.03,
+      "sigma_w": 0.05,
+      "sigma_gps_xy": 0.15,
+      "sigma_theta_deg": 3.0,
+      "sigma_psi1_deg": 2.0
+    },
+    "alto": {
+      "sigma_v": 0.06,
+      "sigma_w": 0.1,
+      "sigma_gps_xy": 0.3,
+      "sigma_theta_deg": 6.0,
+      "sigma_psi1_deg": 4.0
+    }
+  },
+  "sweep_results": {
+    "bajo": {
+      "rmse_odom_m": 0.028772168290749574,
+      "rmse_ekf_m": 0.013245648772141499,
+      "mejora_factor": 2.1721977372119174
+    },
+    "nominal": {
+      "rmse_odom_m": 0.053747929205939314,
+      "rmse_ekf_m": 0.02095140158619439,
+      "mejora_factor": 2.5653619871119124
+    },
+    "alto": {
+      "rmse_odom_m": 0.1053204971907498,
+      "rmse_ekf_m": 0.03583145902299555,
+      "mejora_factor": 2.9393304113895633
+    }
+  },
+  "sigma_range_lidar_m": 0.08,
+  "iou_results": {
+    "a_gt_clean": 0.12866603595080417,
+    "b_odomnoisy_clean": 0.15947467166979362,
+    "c_odomnoisy_noisyrange": 0.28489483747609945,
+    "d_ekf_noisyrange": 0.3072463768115942
+  }
+}

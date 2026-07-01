@@ -1,0 +1,35 @@
+{
+  "nominal": {
+    "zeta": 1.2,
+    "eta": 2.0,
+    "rho0": 1.0,
+    "reached": true,
+    "n_perturbations": 0,
+    "oscillation": false,
+    "min_dist_obstacle_m": 0.6013128775679828,
+    "path_len_m": 10.75
+  },
+  "sensitivity": {
+    "eta_bajo (menos evasivo)": {
+      "reached": true,
+      "n_perturbations": 0,
+      "oscillation": false,
+      "min_dist_to_obstacle_m": 0.4448592850139752,
+      "path_len_m": 10.499999999999993
+    },
+    "nominal": {
+      "reached": true,
+      "n_perturbations": 0,
+      "oscillation": false,
+      "min_dist_to_obstacle_m": 0.6013128775679828,
+      "path_len_m": 10.75
+    },
+    "eta_alto (muy evasivo)": {
+      "reached": true,
+      "n_perturbations": 0,
+      "oscillation": false,
+      "min_dist_to_obstacle_m": 0.6921590305717595,
+      "path_len_m": 11.099999999999998
+    }
+  }
+}
