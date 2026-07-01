@@ -108,8 +108,8 @@ Para el video de evidencia se requiere **CoppeliaSim** con la escena G2T cargada
 - [x] Parte 4 — Análisis de ruido
 - [x] Parte 5 — Path planning
 - [x] Parte 6 — Trajectory following
-- [ ] Video en CoppeliaSim (`coppelia_add_obstacles.py` + `coppelia_playback.py`)
-- [ ] Informe IEEE en LaTeX (formato IEEEtran, español)
+- [x] Video en CoppeliaSim (`coppelia_add_obstacles.py` + `coppelia_playback.py`)
+- [x] Informe IEEE en LaTeX 
 
 ---
 
