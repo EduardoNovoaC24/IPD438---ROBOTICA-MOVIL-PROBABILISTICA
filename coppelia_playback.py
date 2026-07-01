@@ -8,7 +8,7 @@ Este script NO calcula nada -- solo reproduce visualmente las poses
 
 USO:
     1. Asegúrate de haber corrido antes coppelia_add_obstacles.py (una vez).
-    2. Abre tu escena t_2_2 en CoppeliaSim, simulación DETENIDA.
+    2. Abre tu escena GUIA_3_SCENE en CoppeliaSim, simulación DETENIDA.
     3. Activa la grabación de video ANTES de correr este script:
        Barra de herramientas -> ícono de cámara/grabador (o Add-ons ->
        "Video recorder" según tu versión de CoppeliaSim).
